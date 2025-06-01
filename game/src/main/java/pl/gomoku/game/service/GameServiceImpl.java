@@ -3,12 +3,15 @@ package pl.gomoku.game.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pl.gomoku.game.feign.GameStatisticFeignClient;
 import pl.gomoku.game.model.domain.GomokuGame;
 import pl.gomoku.game.model.exception.GameNotFoundException;
 import pl.gomoku.game.model.request.CreateGameRequest;
+import pl.gomoku.game.model.request.GameRequest;
 import pl.gomoku.game.model.response.CreateGameResponse;
 import pl.gomoku.game.model.response.GameResponse;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class GameServiceImpl implements GameService {
 
     private final Map<UUID, GomokuGame> gomokuGamesMap;
+    private final GameStatisticFeignClient gameStatisticFeignClient;
 
     @Override
     public CreateGameResponse createGame(CreateGameRequest createGameRequest) {
@@ -29,6 +33,12 @@ public class GameServiceImpl implements GameService {
                         createGameRequest.getWhitePlayerNickname(),
                         createGameRequest.getBlackPlayerNickname(),
                         createGameRequest.getBoardSize()));
+        gameStatisticFeignClient.createGame(GameRequest.builder()
+                        .gameStartDate(OffsetDateTime.now())
+                        .blackPlayer(createGameRequest.getBlackPlayerNickname())
+                        .whitePlayer(createGameRequest.getWhitePlayerNickname())
+                        .gameIdentifier(gameIdentifier)
+                .build());
         log.info("New gomoku game created for identifier: %s".formatted(gameIdentifier));
         return CreateGameResponse.builder()
                 .gameIdentifier(gameIdentifier)
