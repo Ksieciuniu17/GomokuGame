@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.gomoku.game.model.GomokuGame;
+import pl.gomoku.game.model.exception.GameNotFoundException;
 import pl.gomoku.game.model.request.CreateGameRequest;
 import pl.gomoku.game.model.response.CreateGameResponse;
+import pl.gomoku.game.model.response.GameResponse;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,5 +35,17 @@ public class GameServiceImpl implements GameService {
                 .whitePlayer(createGameRequest.getWhitePlayerNickname())
                 .blackPlayer(createGameRequest.getBlackPlayerNickname())
                 .build();
+    }
+
+    @Override
+    public GameResponse getGomokuGame(UUID uuidIdentifier) {
+        return Optional.ofNullable(gomokuGamesMap.get(uuidIdentifier))
+                .map(game -> GameResponse.builder()
+                        .whitePlayer(game.getWhitePlayer())
+                        .blackPlayer(game.getBlackPlayer())
+                        .build())
+                .orElseThrow(() -> new GameNotFoundException(
+                        "Game with identifier not found for: %s"
+                                .formatted(uuidIdentifier)));
     }
 }
