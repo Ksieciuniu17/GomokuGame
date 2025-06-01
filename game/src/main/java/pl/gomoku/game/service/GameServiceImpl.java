@@ -3,7 +3,7 @@ package pl.gomoku.game.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.gomoku.game.model.GomokuGame;
+import pl.gomoku.game.model.domain.GomokuGame;
 import pl.gomoku.game.model.exception.GameNotFoundException;
 import pl.gomoku.game.model.request.CreateGameRequest;
 import pl.gomoku.game.model.response.CreateGameResponse;
@@ -39,6 +39,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameResponse getGomokuGame(UUID uuidIdentifier) {
+        if (uuidIdentifier == null) {
+            throw new GameNotFoundException("Provided game identifier cannot be null!");
+        }
         return Optional.ofNullable(gomokuGamesMap.get(uuidIdentifier))
                 .map(game -> GameResponse.builder()
                         .whitePlayer(game.getWhitePlayer())

@@ -1,4 +1,4 @@
-package pl.gomoku.game.model;
+package pl.gomoku.game.model.domain;
 
 public class GomokuGame {
 
