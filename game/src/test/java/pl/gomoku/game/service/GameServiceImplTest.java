@@ -6,12 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.gomoku.game.model.domain.GameBoard;
 import pl.gomoku.game.model.domain.GomokuGame;
+import pl.gomoku.game.model.exception.GameNotFoundException;
+import pl.gomoku.game.model.exception.UuidNotValidException;
 import pl.gomoku.game.model.response.GameResponse;
 
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,7 +42,7 @@ class GameServiceImplTest {
                 .blackPlayer("Mariola")
                 .build();
         when(gomokuGameMap.get(validUuid))
-                .thenReturn(new GomokuGame("Stefan", "Mariola", 11));
+                .thenReturn(new GomokuGame("Stefan", "Mariol", new GameBoard(15)));
 
         GameResponse gameResponse = gameService.getGomokuGame(validUuid);
 
@@ -54,15 +58,19 @@ class GameServiceImplTest {
                 .isEqualTo(response.getBlackPlayer());
         softAssertions.assertAll();
     }
-
     @Test
-    void whenGameIdentifierNullThrowGameNotFoundException() {
-        //todo implement test
-    }
+    void whenInvalidGameIdentifierNullThrowGameNotFoundException() {
 
+        UUID invalidUuid = null;
+        assertThrows(UuidNotValidException.class, () -> {
+            gameService.getGomokuGame(invalidUuid);
+        });
+    }
     @Test
     void whenUUidIndentifierNotExistsInGameMapThenThrowNotFoundException() {
-        //todo implement test
-
+        UUID validUuid = UUID.randomUUID();
+        when(gomokuGameMap.get(validUuid)).thenThrow(new GameNotFoundException("Wrong UUID"));
+        assertThrows(GameNotFoundException.class, () -> {
+            gameService.getGomokuGame(validUuid);});
     }
 }
